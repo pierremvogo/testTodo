@@ -37,6 +37,7 @@ export default function Content() {
     const getAllPerson = () =>{
         axios.get("/api/person/getAll")
          .then( async (response:any) => {
+            console.log("")
              console.log("Data Person --------: "+JSON.stringify(response.data.person))
              setDataPerson(response.data.person)
              console.log("Data Person --------: "+JSON.stringify(dataPerson))

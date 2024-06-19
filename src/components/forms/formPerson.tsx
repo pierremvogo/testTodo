@@ -12,6 +12,7 @@ const Form: React.FC = () => {
     phone?: string;}>({});
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log(e)
     e.preventDefault();
 
     // Validate the form fields

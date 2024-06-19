@@ -136,6 +136,7 @@ export default function TodoList() {
   const getAllTask = () =>{
    axios.get("/api/task/getAll")
     .then( async (response:any) => {
+        console.log("")
         setDataTask(response.data.task)
         console.log("Data Task: "+JSON.stringify(dataTask))
     })

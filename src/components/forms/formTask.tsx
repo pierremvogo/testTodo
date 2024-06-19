@@ -60,6 +60,7 @@ export default function FormTask ({persons}: any) {
       newErrors.description = 'Description is required';
     }
     if (Object.keys(newErrors).length > 0) {
+      console.log("")
       setErrors(newErrors);
       return;
     }
