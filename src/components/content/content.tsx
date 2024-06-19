@@ -19,25 +19,30 @@ mock.onGet("/api/person/getAll").reply(200,
 
 export default function Content() {
     const childRef = useRef<any>();
+    const childRef1 = useRef<any>();
     const [type, setType] = useState<any>("")
     const [dataPerson, setDataPerson] = useState<any>([])
     const [staff, setStaff] = useState<any>([])
+    const [closeModal, setCloseModal] = useState(true)
+    
 
+   const handleCallback = () => {
+        childRef1.current.getTask()
+        childRef.current.closeModal();
+    }
     const handleOpen = (param: any) => {
         if(param === "task"){
           setType("task")
-          childRef.current.openModal();
+            childRef.current.openModal();
         }else{
             setType("")
             childRef.current.openModal();
-        }
-       
+        } 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const getAllPerson = () =>{
         axios.get("/api/person/getAll")
          .then( async (response:any) => {
-            console.log("")
              console.log("Data Person --------: "+JSON.stringify(response.data.person))
              setDataPerson(response.data.person)
              console.log("Data Person --------: "+JSON.stringify(dataPerson))
@@ -130,7 +135,6 @@ export default function Content() {
                 {labelData.map((value, index) => {
                     return(
                         <div style={{marginTop:"15px"}} key={index}> 
-                            
                             <span>{labelData[index].icon}</span>
                             <span>{labelData[index].label}</span>
                         </div>
@@ -152,10 +156,10 @@ export default function Content() {
             </div>
             </div>
         </div>
-            <TodoList /> 
+            <TodoList ref={childRef1} /> 
         </div>
     </div>
-     <CustomModal ref={childRef}> {type==="task"?<FormTask persons={staff} />: <FormPerson />} </CustomModal>
+     <CustomModal closeModal={closeModal} ref={childRef}> {type==="task"?<FormTask persons={staff} parentCallback={handleCallback} />: <FormPerson />} </CustomModal>
     </>
   );
 }

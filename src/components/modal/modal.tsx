@@ -3,15 +3,19 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import * as React from 'react';
 
- const  CustomModal = React.forwardRef( ({children, ...attribute}:any, ref) =>{
+ const  CustomModal = React.forwardRef( ({children, closeModal}:any, ref) =>{
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     React.useImperativeHandle(ref, ()=>{
         return{
-            openModal: handleOpen
+            openModal: handleOpen,
+            closeModal: handleClose
         }
     })
+    React.useEffect(()=>{
+      console.log("my close Modal ---------"+closeModal)
+    },[])
     const style = {
         position: 'absolute',
         top: '50%',
@@ -33,7 +37,7 @@ import * as React from 'react';
             >
               <Box sx={style}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                  {attribute.title}
+                 
                 </Typography>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                   {children}

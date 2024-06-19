@@ -1,6 +1,7 @@
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { mock } from "../../mock/mock";
@@ -27,7 +28,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
 }
 )
 
-export default function FormTask ({persons}: any) {
+export default function FormTask ({persons, parentCallback}: any) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [title, setTitle] = useState<any>('');
   const [priority, setPriority] = useState<any>('');
@@ -60,7 +61,6 @@ export default function FormTask ({persons}: any) {
       newErrors.description = 'Description is required';
     }
     if (Object.keys(newErrors).length > 0) {
-      console.log("")
       setErrors(newErrors);
       return;
     }
@@ -89,6 +89,7 @@ export default function FormTask ({persons}: any) {
     setPriority("");
     setStartDate(new Date())
     setErrors({});
+    parentCallback()
   };
 
   useEffect(()=>{
@@ -96,8 +97,14 @@ export default function FormTask ({persons}: any) {
   },[])
 
   const addTask = (task: Todo) => {
-    
     console.log('Added new task:', task);
+    axios.post("api/task/add", task)
+    .then((response)=>{
+        console.log(response)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   };
 
   const handleChange = ()  => {

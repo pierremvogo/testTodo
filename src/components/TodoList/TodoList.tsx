@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { mock } from '../../mock/mock';
 import { task } from '../../mock/task';
 
@@ -117,9 +117,15 @@ mock.onDelete("api/task/delete").reply((payload: any) => {
 }
 )
 
-export default function TodoList() {
+const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
   const [dataTask, setDataTask] = useState<any>([])
   const [gridRowsData, setGridRowsData] = useState<any>([])
+
+  React.useImperativeHandle(ref, ()=>{
+    return{
+        getTask: getAllTask,
+    }
+})
 
   const columns: GridColDef[] = [
     { field: 'col1', headerName: 'User', width: 150 },
@@ -136,7 +142,6 @@ export default function TodoList() {
   const getAllTask = () =>{
    axios.get("/api/task/getAll")
     .then( async (response:any) => {
-        console.log("")
         setDataTask(response.data.task)
         console.log("Data Task: "+JSON.stringify(dataTask))
     })
@@ -169,4 +174,6 @@ export default function TodoList() {
        <DataGrid rows={rows} columns={columns} />
     </div>
   );
-}
+})
+
+export default TodoList
