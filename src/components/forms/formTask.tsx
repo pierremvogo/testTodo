@@ -1,11 +1,9 @@
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { mock } from "../../mock/mock";
-import data from "../../mock/person";
 import { task } from "../../mock/task";
 import Todo from "../../models/Todo";
 import '../../styles/form.scss';
@@ -29,14 +27,8 @@ mock.onPost("api/task/add").reply((payload: any) => {
 }
 )
 
-mock.onGet("/api/person/getAll").reply(200,
-  {
-      person: data.person
-  }
-)
-
-
-const FormTask: React.FC = () => {
+export default function FormTask ({persons}: any) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [title, setTitle] = useState<any>('');
   const [priority, setPriority] = useState<any>('');
   const [person, setPerson] = useState<any>('');
@@ -44,7 +36,6 @@ const FormTask: React.FC = () => {
   const [startDate, setStartDate] = useState<any>(new Date());
   const [endDate, setEndDate] = useState<any>(new Date());
   const [description, setDescription] = useState<any>('');
-  const [dataPerson, setDataPerson] = useState<any>([])
   const [errors, setErrors] = useState<{ 
     title?: string; 
     staff?: string;
@@ -52,32 +43,6 @@ const FormTask: React.FC = () => {
     startDate?: string;
     priority?: string;
     label?: string; }>({});
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const getAllPerson = () =>{
-      axios.get("/api/person/getAll")
-       .then( async (response:any) => {
-           setDataPerson(response.data.person)
-           console.log("Data Person: "+JSON.stringify(dataPerson))
-       })
-       .catch(err => {
-         console.log(err)
-       })
-       }
-
-       useEffect(() => {
-        if(dataPerson.length !== 0 ){
-          console.log(dataPerson);
-          Object.keys(dataPerson).map((value:any,i:number)=>{
-            return setDataPerson((dataPerson: any) => [...dataPerson, {
-              value:dataPerson[i].id,
-              label:dataPerson[i].name,
-            }])
-          })
-          console.log(dataPerson)
-          return
-        } getAllPerson();
-       },[dataPerson,setDataPerson])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,6 +90,10 @@ const FormTask: React.FC = () => {
     setErrors({});
   };
 
+  useEffect(()=>{
+    console.log("PERSON PERSON PERSON / ",persons)
+  },[])
+
   const addTask = (task: Todo) => {
     
     console.log('Added new task:', task);
@@ -133,11 +102,8 @@ const FormTask: React.FC = () => {
   const handleChange = ()  => {
     console.log("djfs")
   }
-  const options = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-  ]
+  const options = persons
+  
   const prioritys = [
     {value: 'facile', label: 'Facile'},
     {value: 'moyen', label: 'Moyen'},
@@ -202,12 +168,9 @@ const FormTask: React.FC = () => {
         ></textarea>
         {errors.description && <div className="error-message">{errors.description}</div>}
       </div>
-      
       <button type="submit" className="btn">
         Add Task
       </button>
     </form>
   );
 };
-
-export default FormTask;

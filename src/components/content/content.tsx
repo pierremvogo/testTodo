@@ -1,5 +1,8 @@
 import { Add, Bolt, PeopleAlt, PriorityHigh, TaskAlt, TodayOutlined } from "@mui/icons-material";
-import { useRef, useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
+import { mock } from "../../mock/mock";
+import data from "../../mock/person";
 import "../../styles/content.scss";
 import TodoList from "../TodoList/TodoList";
 import CustomButton from "../button/button";
@@ -7,9 +10,18 @@ import FormPerson from "../forms/formPerson";
 import FormTask from "../forms/formTask";
 import CustomModal from "../modal/modal";
 
+
+mock.onGet("/api/person/getAll").reply(200,
+    {
+        person: data.person
+    }
+  )
+
 export default function Content() {
     const childRef = useRef<any>();
     const [type, setType] = useState<any>("")
+    const [dataPerson, setDataPerson] = useState<any>([])
+    const [staff, setStaff] = useState<any>([])
 
     const handleOpen = (param: any) => {
         if(param === "task"){
@@ -21,6 +33,32 @@ export default function Content() {
         }
        
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const getAllPerson = () =>{
+        axios.get("/api/person/getAll")
+         .then( async (response:any) => {
+             console.log("Data Person --------: "+JSON.stringify(response.data.person))
+             setDataPerson(response.data.person)
+             console.log("Data Person --------: "+JSON.stringify(dataPerson))
+         })
+         .catch(err => {
+           console.log(err)
+         })
+         }
+    useEffect(() => {
+        if(dataPerson.length !== 0 ){
+            console.log(dataPerson);
+            Object.keys(dataPerson).map((value:any,i:number)=>{
+                return setStaff((staff: any) => [...staff, {
+                value:dataPerson[i].id,
+                label:dataPerson[i].name,
+                }])
+            })
+            console.log("data Person : ",staff)
+            return
+        } 
+        getAllPerson();
+       },[dataPerson])
 
     const taskData =  [
         {
@@ -116,7 +154,7 @@ export default function Content() {
             <TodoList /> 
         </div>
     </div>
-     <CustomModal ref={childRef}> {type==="task"?<FormTask />: <FormPerson />} </CustomModal>
+     <CustomModal ref={childRef}> {type==="task"?<FormTask persons={staff} />: <FormPerson />} </CustomModal>
     </>
   );
 }
