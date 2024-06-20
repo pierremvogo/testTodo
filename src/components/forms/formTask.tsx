@@ -15,8 +15,9 @@ mock.onPost("api/task/add").reply((payload: any) => {
           return [400, payload.data]
       }else{
           const jsonPayload = JSON.parse(payload.data)
-          jsonPayload.id = task.data.length + 
+          jsonPayload.id = task.data.length
           task.data.push(jsonPayload)
+          console.log(task.data.push(jsonPayload))
       }
       return [200, payload.data]
   }catch(err){
@@ -94,6 +95,7 @@ export default function FormTask ({persons, parentCallback}: any) {
 
   useEffect(()=>{
     console.log("PERSON PERSON PERSON / ",persons)
+    console.log("new TASK ADDED"+JSON.stringify(task))
   },[])
 
   const addTask = (task: Todo) => {

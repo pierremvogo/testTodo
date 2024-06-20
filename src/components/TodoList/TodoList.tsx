@@ -21,7 +21,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
           return [400, payload.data]
       }else{
           const jsonPayload = JSON.parse(payload.data)
-          jsonPayload.id = task.data.length + 
+          jsonPayload.id = task.data.length + 1
           task.data.push(jsonPayload)
       }
       return [200, payload.data]
