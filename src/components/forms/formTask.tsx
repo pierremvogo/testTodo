@@ -15,7 +15,8 @@ mock.onPost("api/task/add").reply((payload: any) => {
           return [400, payload.data]
       }else{
           const jsonPayload = JSON.parse(payload.data)
-          jsonPayload.id = task.data.length
+          jsonPayload.id = task.data.length + 1
+          jsonPayload.labels = Object.keys(jsonPayload.labels).map((key) =>{ return  jsonPayload.labels[key].value.toUpperCase()})
           task.data.push(jsonPayload)
           console.log(task.data.push(jsonPayload))
       }
@@ -26,8 +27,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
           message: "Internal Server error!"
       }]
   }
-}
-)
+})
 
 export default function FormTask ({persons, parentCallback}: any) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -46,7 +46,7 @@ export default function FormTask ({persons, parentCallback}: any) {
     priority?: string;
     label?: string; }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => { 
     e.preventDefault();
     const newErrors: { 
       title?: string; 
@@ -67,7 +67,7 @@ export default function FormTask ({persons, parentCallback}: any) {
     }
 
     const newTask: Todo = {
-      id: 1,
+      id: parseInt(person.value),
       title,
       description,
       priority,
@@ -78,7 +78,7 @@ export default function FormTask ({persons, parentCallback}: any) {
       endDate
     };
 
-    console.log(newTask);
+    console.log("newTask: "+JSON.stringify(newTask));
 
     // Add the new person 
     addTask(newTask);
@@ -94,8 +94,6 @@ export default function FormTask ({persons, parentCallback}: any) {
   };
 
   useEffect(()=>{
-    console.log("PERSON PERSON PERSON / ",persons)
-    console.log("new TASK ADDED"+JSON.stringify(task))
   },[])
 
   const addTask = (task: Todo) => {

@@ -14,25 +14,6 @@ mock.onGet("/api/task/getAll").reply(200,
   }
 )
 
-//pour enregistrer une tâche
-mock.onPost("api/task/add").reply((payload: any) => {
-  try{
-      if(payload.data === null){
-          return [400, payload.data]
-      }else{
-          const jsonPayload = JSON.parse(payload.data)
-          jsonPayload.id = task.data.length + 1
-          task.data.push(jsonPayload)
-      }
-      return [200, payload.data]
-  }catch(err){
-      return [500, {
-          status: false,
-          message: "Internal Server error!"
-      }]
-  }
-}
-)
 
 //pour récupérer une tâche 
 mock.onGet("api/task/getById").reply((payload: any) => {
