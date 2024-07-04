@@ -1,6 +1,6 @@
 
-const data =  {
-   person: [
+const person =  {
+   data: [
         { id: 1,
           name: "mvogo pierre",
           email: "mvogpierre129@gmail.com",
@@ -19,4 +19,4 @@ const data =  {
         }
       ]
 }
-export default data
+export default person

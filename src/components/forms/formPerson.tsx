@@ -1,8 +1,29 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import { mock } from '../../mock/mock';
+import mockDataPerson from '../../mock/person';
 import Person from "../../models/Person";
 import '../../styles/form.scss';
 
-const Form: React.FC = () => {
+
+mock.onPost("api/person/add").reply((payload: any) => {
+  try{
+      if(payload.data === null){
+          return [400, payload.data]
+      }else{
+          const jsonPayload = JSON.parse(payload.data)
+          jsonPayload.id = mockDataPerson.data.length + 1
+      }
+      return [200, payload.data]
+  }catch(err){
+      return [500, {
+          status: false,
+          message: "Internal Server error!"
+      }]
+  }
+})
+
+export default function ForamPerson ({parentCallback}:any)  {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -15,7 +36,6 @@ const Form: React.FC = () => {
     console.log(e)
     e.preventDefault();
 
-    // Validate the form fields
     const newErrors: { 
       name?: string; 
       email?: string;
@@ -42,10 +62,10 @@ const Form: React.FC = () => {
 
     // Create a new Person object
     const newPerson: Person = {
-      id: crypto.randomUUID(),
-      name: "pirate",
-      email: "mvogo@gmail.com",
-      phone: "674995825",
+      id: mockDataPerson.data.length + 1,
+      name,
+      email,
+      phone
     };
 
     // Add the new person 
@@ -59,15 +79,18 @@ const Form: React.FC = () => {
   };
 
   const addPerson = (person: Person) => {
-    console.log('Added new task:', person);
+    axios.post("api/person/add", person)
+    .then((response)=>{
+        mockDataPerson.data.concat(response.data)
+        parentCallback( mockDataPerson.data.concat(response.data))
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   };
 
-  const handleChange = ()  => {
-    console.log("djfs")
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="task-form">
+    <form onSubmit={handleSubmit} className="form">
       Add new Person
       <div className="form-group">
         <input
@@ -111,5 +134,3 @@ const Form: React.FC = () => {
     </form>
   );
 };
-
-export default Form;

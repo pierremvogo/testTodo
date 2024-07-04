@@ -1,5 +1,5 @@
 enum Labels {
-    "HTML", "CSS", "NODE", "JS", "JQUERY"
+    "HTML", "CSS","JQUERY","NODE JS"
 }
 
 export default Labels

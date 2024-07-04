@@ -1,8 +1,15 @@
+import { Add, Delete, Done, Edit, LabelOutlined, PriorityHigh, Today } from '@mui/icons-material';
+import { Avatar, Box, Button, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import moment from 'moment';
+import React, { useEffect, useRef, useState } from 'react';
+import img1 from '../../assets/image/img1.jpg';
 import { mock } from '../../mock/mock';
 import { task } from '../../mock/task';
+import FormTask from '../forms/formTask';
+import CustomModal from '../modal/modal';
+import "./style.scss";
 
 
 
@@ -14,8 +21,6 @@ mock.onGet("/api/task/getAll").reply(200,
   }
 )
 
-
-//pour récupérer une tâche 
 mock.onGet("api/task/getById").reply((payload: any) => {
   try{
       const id = payload.id
@@ -77,10 +82,10 @@ mock.onPut("api/task/update").reply((payload: any) => {
 }
 )
 //pour supprimer une tâche
-mock.onDelete("api/task/delete").reply((payload: any) => {
+mock.onDelete("api/task/delete").reply((id: any) => {
   try{
-      const id = payload.id
-      const taskId = Number(id)
+
+      const taskId = id
       const getTaskIndex = task.data.findIndex(value => value.id === taskId)
       task.data.splice(getTaskIndex, 1)
       return [200, {
@@ -98,9 +103,21 @@ mock.onDelete("api/task/delete").reply((payload: any) => {
 }
 )
 
+
 const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
+  const childRef = useRef<any>();
+  const childRef1 = useRef<any>();
+
   const [dataTask, setDataTask] = useState<any>([])
   const [gridRowsData, setGridRowsData] = useState<any>([])
+  const [rowId, setRowId] = useState(null)
+  const [staff, setStaff] = useState<any>([])
+  const [closeModal, setCloseModal] = useState(true)
+
+  const handleCallback = (newArray:[]) => {
+    setDataTask(newArray)
+    childRef.current.closeModal();
+}
 
   React.useImperativeHandle(ref, ()=>{
     return{
@@ -108,19 +125,62 @@ const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
     }
 })
 
+const handleModal = () => {
+  childRef.current.openModal();
+}
+
+const editTask = (idTask:any) => {
+  childRef.current.openModal();
+}
+const deleteTask = (idTask:any) => {
+  axios.delete("api/task/delete", idTask)
+  .then( async (response:any) =>  {
+    console.log(response.data)
+    setDataTask(task.data)
+})}
+
+
   const columns: GridColDef[] = [
-    { field: 'col1', headerName: 'User', width: 150 },
-    { field: 'col2', headerName: 'Task Title', width: 150 },
-    { field: 'col3', headerName: 'Description', width: 250 },
-    { field: 'col4', headerName: 'Labels', width: 250 },
-    { field: 'col5', headerName: 'Start Date', width: 250 },
-    { field: 'col6', headerName: 'End Date', width: 250 },
-    { field: 'col7', headerName: 'Complited', width: 250 },
+    { field: 'col1', headerName: 'User', width: 150, editable:false, renderCell:params=>
+                                                      <Avatar src={img1} />, 
+                                                      sortable:false, 
+                                                      filterable:false},
+    { field: 'col2', headerName: 'Task Title', width: 150,  editable:false},
+    { field: 'col3', headerName: 'Description', width: 250, editable:false},
+    { field: 'col4', headerName: 'Labels', width: 200, editable:false, renderCell:(params)=>{
+      console.log("MAY PARAMS COL4 : ", params.row)
+      return Object.keys(params.row.col4).map((key) => { 
+        console.log("<<<<<<<<<<--------",typeof(params.row.col4[key]))
+        return params.row.col4[key] === "HTML"?
+        <LabelOutlined  style={{color: "red", height: "30px"}} />:
+        params.row.col4[key] === "CSS"?
+        <LabelOutlined  style={{color: "blue", height: "30px"}} />: 
+        params.row.col4[key] === "JQUERY"?
+        <LabelOutlined  style={{color: "green", height: "30px"}} />:
+        params.row.col4[key] === "NODE JS"?
+        <LabelOutlined  style={{color: "grey", height: "30px"}} />:""; });
+    } },
+    { field: 'col5', headerName: 'Start Date', width: 200, editable:false, renderCell:params=>
+                                                      moment(params.row.startDate).format('YYYY-MM-DD HH-MM-SS')},
+    { field: 'col6', headerName: 'End Date', width: 200, editable:false, renderCell:params=>
+                                                      moment(params.row.endDate).format('YYYY-MM-DD HH-MM-SS') },
+    { field: 'col7', headerName: 'Complited', width: 200, editable:false, },
+    { field: 'col8', headerName: 'Edit',  renderCell:(params)=> {
+                                                      return <Button onClick={()=>editTask(params.row.id)}><Edit style={{cursor:"pointer"}}   /></Button> ;
+                                                },
+                                                
+                                              },
+    { field: 'col9', headerName: 'Delete',  renderCell:(params)=> {
+                                                return <Button onClick={()=>deleteTask(params.row.id)}><Delete style={{color:"red", cursor:"pointer"}}  /></Button> ;
+                                          },
+                                          
+                                        },
+                                              
   ];
 
  const rows: GridRowsProp = gridRowsData;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getAllTask = () =>{
+  const getAllTask = () => {
    axios.get("/api/task/getAll")
     .then( async (response:any) => {
         setDataTask(response.data.task)
@@ -130,9 +190,9 @@ const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
       console.log(err)
     })
     }
+    
     useEffect(()=>{
       if(dataTask.length !== 0 ){
-        console.log(dataTask);
         Object.keys(dataTask).map((value:any,i:number)=>{
           return setGridRowsData((gridRowsData: any) => [...gridRowsData, {
             id:dataTask[i].id,
@@ -148,12 +208,51 @@ const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
         console.log(gridRowsData)
         return
       } getAllTask();
+
     },[dataTask])
   
   return (
-    <div style={{ height: 300, width: '100%' }}>
-       <DataGrid rows={rows} columns={columns} />
-    </div>
+    <>
+      <Box
+        sx={{
+          heiht: 400,
+          width: '100%'
+        }}
+      >
+        
+        <Typography
+          variant='h4'
+          component={'h3'}
+          sx={{textAlign: 'center', mt:3, mb:3}}
+        >
+          <div className="task-title">
+            <div className="btn-task">
+              <Button className='btn' variant= "outlined" startIcon={<PriorityHigh />} >
+                Priority
+              </Button>
+              <Button className='btn' variant= "outlined" startIcon={<Today />} >
+                Today
+              </Button>
+              <Button className='btn' variant= "outlined" startIcon={<Done />} >
+                Completed
+              </Button>
+              <Button className='btn-add' variant= "outlined" onClick={handleModal} startIcon={<Add />} >
+                Add New Task
+              </Button>
+            </div>
+          </div>
+        </Typography>
+        <DataGrid  
+          rows={rows} 
+          columns={columns}
+          getRowId={row => row.id}
+          />
+      </Box>
+      <CustomModal  ref={childRef}> 
+        {<FormTask persons={staff} parentCallback={handleCallback} />} 
+    </CustomModal>
+    </>
+   
   );
 })
 

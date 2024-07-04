@@ -7,6 +7,7 @@ import * as React from 'react';
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    
     React.useImperativeHandle(ref, ()=>{
         return{
             openModal: handleOpen,

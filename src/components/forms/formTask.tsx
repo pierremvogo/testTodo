@@ -5,6 +5,7 @@ import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { mock } from "../../mock/mock";
+import persons from "../../mock/person";
 import { task } from "../../mock/task";
 import Todo from "../../models/Todo";
 import '../../styles/form.scss';
@@ -17,8 +18,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
           const jsonPayload = JSON.parse(payload.data)
           jsonPayload.id = task.data.length + 1
           jsonPayload.labels = Object.keys(jsonPayload.labels).map((key) =>{ return  jsonPayload.labels[key].value.toUpperCase()})
-          task.data.push(jsonPayload)
-          console.log(task.data.push(jsonPayload))
+
       }
       return [200, payload.data]
   }catch(err){
@@ -29,7 +29,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
   }
 })
 
-export default function FormTask ({persons, parentCallback}: any) {
+export default function FormTask ({parentCallback}: any) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [title, setTitle] = useState<any>('');
   const [priority, setPriority] = useState<any>('');
@@ -38,6 +38,7 @@ export default function FormTask ({persons, parentCallback}: any) {
   const [startDate, setStartDate] = useState<any>(new Date());
   const [endDate, setEndDate] = useState<any>(new Date());
   const [description, setDescription] = useState<any>('');
+  const [staff, setStaff] = useState<any>([])
   const [errors, setErrors] = useState<{ 
     title?: string; 
     staff?: string;
@@ -90,27 +91,29 @@ export default function FormTask ({persons, parentCallback}: any) {
     setPriority("");
     setStartDate(new Date())
     setErrors({});
-    parentCallback()
   };
 
   useEffect(()=>{
+    Object.keys(persons.data).map((value:any,i:number)=>{
+      return setStaff((staff: any) => [...staff, {
+      value:persons.data[i].id,
+      label:persons.data[i].name,
+      }])
+  })
   },[])
 
-  const addTask = (task: Todo) => {
-    console.log('Added new task:', task);
-    axios.post("api/task/add", task)
+  const addTask = (tasks: Todo) => {
+    axios.post("api/task/add", tasks)
     .then((response)=>{
-        console.log(response)
+        task.data.concat(response.data)
+        parentCallback(task.data.concat(response.data))
     })
     .catch((error) => {
       console.log(error)
     })
   };
 
-  const handleChange = ()  => {
-    console.log("djfs")
-  }
-  const options = persons
+  const options = staff
   
   const prioritys = [
     {value: 'facile', label: 'Facile'},
@@ -127,7 +130,7 @@ export default function FormTask ({persons, parentCallback}: any) {
   ]
 
   return (
-    <form onSubmit={handleSubmit} className="task-form">
+    <form onSubmit={handleSubmit} className="form">
       Add new Task
       <div className="form-group">
         <input
@@ -182,3 +185,5 @@ export default function FormTask ({persons, parentCallback}: any) {
     </form>
   );
 };
+
+
