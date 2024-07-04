@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { mock } from "../../mock/mock";
 import persons from "../../mock/person";
-import { task } from "../../mock/task";
+import mockDataTask from "../../mock/task";
 import Todo from "../../models/Todo";
 import '../../styles/form.scss';
 
@@ -16,9 +16,7 @@ mock.onPost("api/task/add").reply((payload: any) => {
           return [400, payload.data]
       }else{
           const jsonPayload = JSON.parse(payload.data)
-          jsonPayload.id = task.data.length + 1
-          jsonPayload.labels = Object.keys(jsonPayload.labels).map((key) =>{ return  jsonPayload.labels[key].value.toUpperCase()})
-
+          jsonPayload.id = mockDataTask.data.length + 1
       }
       return [200, payload.data]
   }catch(err){
@@ -68,7 +66,7 @@ export default function FormTask ({parentCallback}: any) {
     }
 
     const newTask: Todo = {
-      id: parseInt(person.value),
+      id: mockDataTask.data.length + 1,
       title,
       description,
       priority,
@@ -81,10 +79,10 @@ export default function FormTask ({parentCallback}: any) {
 
     console.log("newTask: "+JSON.stringify(newTask));
 
-    // Add the new person 
+  
     addTask(newTask);
 
-    // Reset the form fields
+    
     setTitle('');
     setDescription('');
     setLabels([]);
@@ -94,26 +92,26 @@ export default function FormTask ({parentCallback}: any) {
   };
 
   useEffect(()=>{
-    Object.keys(persons.data).map((value:any,i:number)=>{
-      return setStaff((staff: any) => [...staff, {
-      value:persons.data[i].id,
-      label:persons.data[i].name,
-      }])
-  })
+    
+    
   },[])
 
   const addTask = (tasks: Todo) => {
     axios.post("api/task/add", tasks)
     .then((response)=>{
-        task.data.concat(response.data)
-        parentCallback(task.data.concat(response.data))
+        response.data.labels = Object.keys(response.data.labels).map((key) =>{ return  response.data.labels[key].label})
+        parentCallback(mockDataTask.data.concat(response.data))
     })
     .catch((error) => {
       console.log(error)
     })
   };
 
-  const options = staff
+  const options = Object.keys(persons.data).map((value:any,i:number)=>{
+    return {
+    value:persons.data[i].id,
+    label:persons.data[i].name,
+    }});
   
   const prioritys = [
     {value: 'facile', label: 'Facile'},
@@ -124,8 +122,7 @@ export default function FormTask ({parentCallback}: any) {
   const label = [
     {value: 'html', label: 'HTML'},
     {value: 'css', label: 'CSS'},
-    {value: 'node', label: 'NODE'},
-    {value: 'js', label: 'JS'},
+    {value: 'nodejs', label: 'NODE JS'},
     {value: 'jquery', label: 'JQUERY'},
   ]
 

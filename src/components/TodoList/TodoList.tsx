@@ -6,7 +6,7 @@ import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import img1 from '../../assets/image/img1.jpg';
 import { mock } from '../../mock/mock';
-import { task } from '../../mock/task';
+import mockDataTask from '../../mock/task';
 import FormTask from '../forms/formTask';
 import CustomModal from '../modal/modal';
 import "./style.scss";
@@ -17,7 +17,7 @@ import "./style.scss";
 
 mock.onGet("/api/task/getAll").reply(200,
   {
-      task: task.data
+      task: mockDataTask.data
   }
 )
 
@@ -25,7 +25,7 @@ mock.onGet("api/task/getById").reply((payload: any) => {
   try{
       const id = payload.id
       const taskId = Number(id)
-      const taskDetails = task.data.find(value => value.id === taskId) 
+      const taskDetails = mockDataTask.data.find(value => value.id === taskId) 
       if(taskDetails !== undefined){
           return [200, {
               status: true,
@@ -58,7 +58,7 @@ mock.onPut("api/task/update").reply((payload: any) => {
       }else{
           const jsonData = JSON.parse(payload.data)
           const taskId = Number(jsonData.id)
-          newList = task.data.map((items) => {
+          newList = mockDataTask.data.map((items) => {
           return  items.id === taskId? {...items,
                   title: jsonData.title,
                   person_id: jsonData.personId,
@@ -70,7 +70,7 @@ mock.onPut("api/task/update").reply((payload: any) => {
                   complited: jsonData.complited
               }: items});
           }
-          task.data = newList;
+          mockDataTask.data = newList;
           return [200, payload.data]
       
   }catch(err){
@@ -86,8 +86,8 @@ mock.onDelete("api/task/delete").reply((id: any) => {
   try{
 
       const taskId = id
-      const getTaskIndex = task.data.findIndex(value => value.id === taskId)
-      task.data.splice(getTaskIndex, 1)
+      const getTaskIndex = mockDataTask.data.findIndex(value => value.id === taskId)
+      mockDataTask.data.splice(getTaskIndex, 1)
       return [200, {
           status: true,
           message: "Task delete sucessfully"
@@ -106,13 +106,10 @@ mock.onDelete("api/task/delete").reply((id: any) => {
 
 const  TodoList =  React.forwardRef(({ getTask }:any, ref) => {
   const childRef = useRef<any>();
-  const childRef1 = useRef<any>();
 
   const [dataTask, setDataTask] = useState<any>([])
   const [gridRowsData, setGridRowsData] = useState<any>([])
-  const [rowId, setRowId] = useState(null)
   const [staff, setStaff] = useState<any>([])
-  const [closeModal, setCloseModal] = useState(true)
 
   const handleCallback = (newArray:[]) => {
     setDataTask(newArray)
@@ -135,8 +132,7 @@ const editTask = (idTask:any) => {
 const deleteTask = (idTask:any) => {
   axios.delete("api/task/delete", idTask)
   .then( async (response:any) =>  {
-    console.log(response.data)
-    setDataTask(task.data)
+    setDataTask(mockDataTask.data)
 })}
 
 
@@ -148,9 +144,7 @@ const deleteTask = (idTask:any) => {
     { field: 'col2', headerName: 'Task Title', width: 150,  editable:false},
     { field: 'col3', headerName: 'Description', width: 250, editable:false},
     { field: 'col4', headerName: 'Labels', width: 200, editable:false, renderCell:(params)=>{
-      console.log("MAY PARAMS COL4 : ", params.row)
       return Object.keys(params.row.col4).map((key) => { 
-        console.log("<<<<<<<<<<--------",typeof(params.row.col4[key]))
         return params.row.col4[key] === "HTML"?
         <LabelOutlined  style={{color: "red", height: "30px"}} />:
         params.row.col4[key] === "CSS"?
@@ -184,7 +178,6 @@ const deleteTask = (idTask:any) => {
    axios.get("/api/task/getAll")
     .then( async (response:any) => {
         setDataTask(response.data.task)
-        console.log("Data Task: "+JSON.stringify(dataTask))
     })
     .catch(err => {
       console.log(err)
@@ -193,6 +186,7 @@ const deleteTask = (idTask:any) => {
     
     useEffect(()=>{
       if(dataTask.length !== 0 ){
+        setGridRowsData([])
         Object.keys(dataTask).map((value:any,i:number)=>{
           return setGridRowsData((gridRowsData: any) => [...gridRowsData, {
             id:dataTask[i].id,

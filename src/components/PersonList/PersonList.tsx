@@ -5,8 +5,7 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import img1 from '../../assets/image/img1.jpg';
 import { mock } from '../../mock/mock';
-import person from '../../mock/person';
-import { task } from '../../mock/task';
+import mockDataPerson from '../../mock/person';
 import FormPerson from '../forms/formPerson';
 import CustomModal from '../modal/modal';
 import "./style.scss";
@@ -16,13 +15,13 @@ import "./style.scss";
 
 mock.onGet("/api/person/getAll").reply(200,
   {
-      person: person.data
+      person: mockDataPerson.data
   }
 )
 mock.onGet("api/person/getById").reply((id: any) => {
   try{
       const personId = id
-      const personDetails = person.data.find(value => value.id === personId) 
+      const personDetails = mockDataPerson.data.find(value => value.id === personId) 
       if(personDetails !== undefined){
           return [200, {
               status: true,
@@ -53,14 +52,14 @@ mock.onPut("api/person/update").reply((payload: any) => {
       }else{
           const jsonData = JSON.parse(payload.data)
           const personId = Number(jsonData.id)
-          newList = person.data.map((items) => {
+          newList = mockDataPerson.data.map((items) => {
           return  items.id === personId? {...items,
                   name: jsonData.name,
                   email: jsonData.email,
                   phone: jsonData.phone,
               }: items});
           }
-          person.data = newList;
+          mockDataPerson.data = newList;
           return [200, payload.data]
       
   }catch(err){
@@ -74,8 +73,8 @@ mock.onPut("api/person/update").reply((payload: any) => {
 mock.onDelete("api/person/delete").reply((id: any) => {
   try{
       const personId = id
-      const getPersonIndex = person.data.findIndex(value => value.id === personId)
-      task.data.splice(getPersonIndex, 1)
+      const getPersonIndex = mockDataPerson.data.findIndex(value => value.id === personId)
+      mockDataPerson.data.splice(getPersonIndex, 1)
       return [200, {
           status: true,
           message: "Person delete sucessfully"
@@ -117,7 +116,7 @@ const deletePerson = (idPerson:any) => {
   axios.delete("api/person/delete", idPerson)
   .then( async (response:any) =>  {
         console.log(response.data)
-        setDataPerson(task.data)
+        setDataPerson(mockDataPerson.data)
   })
 }
 
@@ -130,7 +129,7 @@ const deletePerson = (idPerson:any) => {
     { field: 'col3', headerName: 'Email', width: 250, editable:false},
     { field: 'col4', headerName: 'Phone', width: 250, editable:false },
     { field: 'col5', headerName: 'Edit',  renderCell:(params)=> {return <Button onClick={()=>editPerson(params.row.id)}><Edit style={{cursor:"pointer"}}   /></Button> ;},},
-    { field: 'col6', headerName: 'Delete',  renderCell:(params)=> {return <Button onClick={()=>deletePerson(params.row.id)}><Delete style={{color:"red", cursor:"pointer"}}  /></Button> ;;},},
+    { field: 'col6', headerName: 'Delete',  renderCell:(params)=> {return <Button onClick={()=>deletePerson(params.row.id)}><Delete style={{color:"red", cursor:"pointer"}}  /></Button> ;},},
     
   ];
 

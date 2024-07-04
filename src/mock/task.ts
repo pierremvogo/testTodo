@@ -1,5 +1,5 @@
 
-export const task =  {
+const task =  {
     data: [
         {   id: 1,
             title: "task1",
@@ -53,3 +53,5 @@ export const task =  {
         } 
        ]
  }
+
+ export default task
